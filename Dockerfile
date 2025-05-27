@@ -10,6 +10,8 @@ COPY package*.json ./
 
 RUN npm install --force
 
+RUN npx prisma generate
+
 
 FROM postgres:13.1 AS ghosttachi_postgres
 
