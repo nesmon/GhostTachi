@@ -1,0 +1,29 @@
+services:
+    node:
+        build: 
+            context: .
+            target: ghosttachi_node
+        volumes:
+            - .:/home/docker
+        ports:
+            - "8083:8080"
+        command: sh -c "npx prisma generate && node app.js"
+        depends_on:
+            - db
+
+    db:
+        build:
+            context: .
+            target: ghosttachi_postgres
+        ports:
+            - "8084:5432"
+        environment:
+            POSTGRES_PASSWORD: ghosttachi
+            POSTGRES_USER: ghosttachi
+            POSTGRES_DB: ghosttachi
+        volumes:
+            - ghosttachiDB:/var/lib/postgresql/data
+    
+volumes:
+    ghosttachiDB: {}
+    ghosttachi: {}
