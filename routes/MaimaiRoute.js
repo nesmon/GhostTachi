@@ -12,7 +12,7 @@ class MaimaiRoute {
             const { username } = request.params;
 
             try {
-                const response = await axios.get(`https://kamai.tachi.ac/api/v1/users/${username}/games/chunithm/Single/pbs/all`);
+                const response = await axios.get(`https://kamai.tachi.ac/api/v1/users/${username}/games/maimai/Single/pbs/all`);
                 const data = response.data;
 
                 const user = await prisma.maimaiFinale.findUnique({
@@ -49,6 +49,48 @@ class MaimaiRoute {
                 }
             }
         });
+
+        fastify.get('/allUser', async (request, reply) => {
+            const users = await prisma.maimaiFinale.findMany({
+                select: {
+                    username: true,
+                    userData: true
+                }
+            });
+
+            if (users.length === 0) {
+                return reply.status(404).send({ error: 'No users found' });
+            }
+
+            const allUserData = users.map(user => {
+                const userData = JSON.parse(user.userData);
+                const pbs = userData.body.pbs;
+
+                let topPbs = this.getTopRate(pbs, 30);
+                let ratings = 0;
+
+                topPbs.forEach(pb => {
+                    ratings += pb.calculatedData.rate;
+                });
+
+                return {
+                    username: user.username,
+                    averageRating: ratings / topPbs.length,
+                };
+            }
+            );
+            return reply.send(this.getTop(allUserData));
+        });
+    }
+
+    getTopRate(arr, max) {
+        let top = arr.sort((a, b) => b.calculatedData.rate - a.calculatedData.rate).slice(0, max);
+        return top;
+    }
+
+    getTop(arr) {
+        let top = arr.sort((a, b) => b.averageRating - a.averageRating);
+        return top;
     }
 }
 
