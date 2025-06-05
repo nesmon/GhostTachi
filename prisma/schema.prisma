@@ -13,50 +13,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model MaimaiFinale {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model MaimaiDX {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model Chunithm {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model Ongeki {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model Wacca {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model SDVX {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model Jubeat {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
-}
-
-model IIDX {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
-  userData        Json?
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  maimai Json?
+  maimaiDX     Json?
+  chunithm     Json?
+  ongeki       Json?
+  wacca        Json?
+  sdvx         Json?
+  jubeat       Json?
+  iidx         Json?
 }

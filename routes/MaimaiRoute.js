@@ -1,4 +1,5 @@
 const axios = require('axios');
+const GhostHelper = require('./../lib/GhostHelper');
 
 class MaimaiRoute {
     constructor() {
@@ -8,41 +9,24 @@ class MaimaiRoute {
     async register(fastify, options) {
         const prisma = options.prisma;
 
-        fastify.get('/:username', async (request, reply) => {
+        fastify.get('/user/:username', async (request, reply) => {
             const { username } = request.params;
 
             try {
                 const response = await axios.get(`https://kamai.tachi.ac/api/v1/users/${username}/games/maimai/Single/pbs/all`);
                 const data = response.data;
 
-                const user = await prisma.maimaiFinale.findUnique({
-                    where: { username: username }
-                });
-                
-                if (!user) {
-                    await prisma.maimaiFinale.create({
-                        data: {
-                            username: username,
-                            userData: JSON.stringify(data)
-                        }
-                    });
-                } else {
-                    await prisma.maimaiFinale.update({
-                        where: { username: username },
-                        data: {
-                            userData: JSON.stringify(data)
-                        }
-                    });
-                }
+                GhostHelper.gameDataPush(prisma, username, data, 'maimai');
 
                 return reply.send(data);
             } catch (error) {
-                const user = await prisma.maimaiFinale.findUnique({
+                const user = await prisma.user.findUnique({
                     where: { username: username }
                 });
+
                 if (user) {
                     console.log(`User found in database: ${username}`);
-                    return reply.send(JSON.parse(user.userData));
+                    return reply.send(JSON.parse(user.maimai));
                 } else {
                     console.error(`Error fetching data for user ${username}:`, error.message);
                     return reply.status(404).send({ error: 'User not found' });
@@ -51,22 +35,17 @@ class MaimaiRoute {
         });
 
         fastify.get('/allUser', async (request, reply) => {
-            const users = await prisma.maimaiFinale.findMany({
-                select: {
-                    username: true,
-                    userData: true
-                }
-            });
+            const users = GhostHelper.getAllUserForGame(prisma, 'maimai');
 
             if (users.length === 0) {
                 return reply.status(404).send({ error: 'No users found' });
             }
 
             const allUserData = users.map(user => {
-                const userData = JSON.parse(user.userData);
+                const userData = JSON.parse(user.maimai);
                 const pbs = userData.body.pbs;
 
-                let topPbs = this.getTopRate(pbs, 30);
+                let topPbs = this.getTopRate(pbs, 30);  
                 let ratings = 0;
 
                 topPbs.forEach(pb => {
