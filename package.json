@@ -14,7 +14,7 @@
   "author": "Nenes (Lily)",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "kurami": "node ./lib/Kurami/kurami.js"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
